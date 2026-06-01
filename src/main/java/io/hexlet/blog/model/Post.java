@@ -1,21 +1,22 @@
 package io.hexlet.blog.model;
 
-import jakarta.validation.constraints.NotBlank;
-import java.time.LocalDateTime;
+import jakarta.persistence.*;
 
+@Entity
+@Table(name = "posts")
 public class Post {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Title is required")
+    @Column(nullable = false)
     private String title;
 
-    @NotBlank(message = "Content is required")
+    @Column(nullable = false, length = 5000)
     private String content;
 
-    @NotBlank(message = "Author is required")
     private String author;
-    
-    private LocalDateTime createdAt;
 
     public Post() {
     }
@@ -24,7 +25,6 @@ public class Post {
         this.title = title;
         this.content = content;
         this.author = author;
-        this.createdAt = LocalDateTime.now();
     }
 
     public Long getId() {
@@ -57,13 +57,5 @@ public class Post {
 
     public void setAuthor(String author) {
         this.author = author;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
     }
 }

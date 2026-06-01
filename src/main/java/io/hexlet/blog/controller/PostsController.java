@@ -1,72 +1,54 @@
 package io.hexlet.blog.controller;
 
 import io.hexlet.blog.model.Post;
+import io.hexlet.blog.repository.PostRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 
 @RestController
 @RequestMapping("/api/posts")
 public class PostsController {
 
-    private final List<Post> posts = new ArrayList<>();
-    private final AtomicLong idCounter = new AtomicLong(1);
+    @Autowired
+    private PostRepository postRepository;
 
     @GetMapping
-    public ResponseEntity<List<Post>> index() {
-        return ResponseEntity.ok()
-                .header("X-Total-Count", String.valueOf(posts.size()))
-                .body(posts);
+    public List<Post> index() {
+        return postRepository.findAll();
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Post> show(@PathVariable Long id) {
-        Optional<Post> post = posts.stream()
-                .filter(p -> p.getId().equals(id))
-                .findFirst();
-        
-        return ResponseEntity.of(post);
+        return postRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<Post> create(@RequestBody Post post) {
-        Long newId = idCounter.getAndIncrement();
-        post.setId(newId);
-        posts.add(post);
-        return ResponseEntity.status(HttpStatus.CREATED).body(post);
+    @ResponseStatus(HttpStatus.CREATED)
+    public Post create(@RequestBody Post post) {
+        return postRepository.save(post);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Post> update(@PathVariable Long id, @RequestBody Post updatedPost) {
-        Optional<Post> existingPost = posts.stream()
-                .filter(p -> p.getId().equals(id))
-                .findFirst();
-
-        if (existingPost.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        Post post = existingPost.get();
-        post.setTitle(updatedPost.getTitle());
-        post.setContent(updatedPost.getContent());
-        post.setAuthor(updatedPost.getAuthor());
-
-        return ResponseEntity.ok(post);
+    public ResponseEntity<Post> update(@PathVariable Long id, @RequestBody Post postData) {
+        return postRepository.findById(id)
+                .map(post -> {
+                    post.setTitle(postData.getTitle());
+                    post.setContent(postData.getContent());
+                    post.setAuthor(postData.getAuthor());
+                    return ResponseEntity.ok(postRepository.save(post));
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> destroy(@PathVariable Long id) {
-        boolean removed = posts.removeIf(p -> p.getId().equals(id));
-        
-        if (!removed) {
-            return ResponseEntity.notFound().build();
-        }
-        
-        return ResponseEntity.noContent().build();
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id) {
+        postRepository.deleteById(id);
     }
 }
