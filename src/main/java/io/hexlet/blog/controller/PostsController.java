@@ -6,6 +6,9 @@ import io.hexlet.blog.repository.PostRepository;
 import io.hexlet.blog.repository.UserRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -27,21 +30,45 @@ public class PostsController {
         return postRepository.findAll();
     }
 
+    @GetMapping("/published")
+    public Page<Post> getPublishedPosts(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "5") int size,
+        @RequestParam(defaultValue = "createdAt") String sortBy,
+        @RequestParam(defaultValue = "desc") String direction
+    ) {
+        Sort.Direction sortDirection = direction.equalsIgnoreCase("desc") 
+            ? Sort.Direction.DESC 
+            : Sort.Direction.ASC;
+        
+        Sort sort = Sort.by(sortDirection, sortBy);
+        PageRequest pageRequest = PageRequest.of(page, size, sort);
+        
+        return postRepository.findByPublishedTrue(pageRequest);
+    }
+
     @GetMapping("/{id}")
     public Post show(@PathVariable Long id) {
-        return postRepository.findById(id)
+        Post post = postRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
+        
+        if (!post.isPublished()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found");
+        }
+        
+        return post;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Post create(@Valid @RequestBody Post post) {
-        // Проверяем, что user существует
         if (post.getUser() != null && post.getUser().getId() != null) {
             User user = userRepository.findById(post.getUser().getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
             post.setUser(user);
         }
+        // Сохраняем значение published из запроса, если оно передано
+        // Если не передано, по умолчанию false (уже установлено в модели)
         return postRepository.save(post);
     }
 
@@ -50,12 +77,16 @@ public class PostsController {
         Post post = postRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
         
-        // Используем правильные поля: title и body
         if (postData.getTitle() != null) {
             post.setTitle(postData.getTitle());
         }
         if (postData.getBody() != null) {
             post.setBody(postData.getBody());
+        }
+        // Обновляем published, если оно передано в запросе
+        // Используем isPublished() для примитива boolean
+        if (postData.isPublished() != post.isPublished()) {
+            post.setPublished(postData.isPublished());
         }
         
         return postRepository.save(post);

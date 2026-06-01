@@ -22,6 +22,8 @@ public class Post {
 
     private String title;
     private String body;
+    
+    private boolean published = false;  // Новое поле
 
     @ManyToOne
     @JoinColumn(name = "user_id")
