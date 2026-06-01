@@ -1,10 +1,12 @@
 package io.hexlet.blog.controller;
 
+import io.hexlet.blog.dto.PostDTO;
+import io.hexlet.blog.dto.PostCreateDTO;
+import io.hexlet.blog.mapper.PostMapper;
 import io.hexlet.blog.model.Post;
 import io.hexlet.blog.model.User;
 import io.hexlet.blog.repository.PostRepository;
 import io.hexlet.blog.repository.UserRepository;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,25 +15,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/posts")
 public class PostsController {
 
     @Autowired
     private PostRepository postRepository;
-
+    
     @Autowired
     private UserRepository userRepository;
-
-    @GetMapping
-    public List<Post> index() {
-        return postRepository.findAll();
-    }
+    
+    @Autowired
+    private PostMapper postMapper;
 
     @GetMapping("/published")
-    public Page<Post> getPublishedPosts(
+    public Page<PostDTO> getPublishedPosts(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "5") int size,
         @RequestParam(defaultValue = "createdAt") String sortBy,
@@ -44,52 +42,41 @@ public class PostsController {
         Sort sort = Sort.by(sortDirection, sortBy);
         PageRequest pageRequest = PageRequest.of(page, size, sort);
         
-        return postRepository.findByPublishedTrue(pageRequest);
+        return postRepository.findByPublishedTrue(pageRequest)
+                .map(postMapper::toDTO);
     }
 
     @GetMapping("/{id}")
-    public Post show(@PathVariable Long id) {
+    public PostDTO show(@PathVariable Long id) {
         Post post = postRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
         
         if (!post.isPublished()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found");
         }
         
-        return post;
+        return postMapper.toDTO(post);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Post create(@Valid @RequestBody Post post) {
-        if (post.getUser() != null && post.getUser().getId() != null) {
-            User user = userRepository.findById(post.getUser().getId())
+    public PostDTO create(@RequestBody PostCreateDTO postCreateDTO) {
+        User user = userRepository.findById(postCreateDTO.getUserId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-            post.setUser(user);
-        }
-        // Сохраняем значение published из запроса, если оно передано
-        // Если не передано, по умолчанию false (уже установлено в модели)
-        return postRepository.save(post);
+        
+        Post post = postMapper.toEntity(postCreateDTO, user);
+        Post savedPost = postRepository.save(post);
+        return postMapper.toDTO(savedPost);
     }
 
     @PutMapping("/{id}")
-    public Post update(@PathVariable Long id, @Valid @RequestBody Post postData) {
+    public PostDTO update(@PathVariable Long id, @RequestBody PostCreateDTO postUpdateDTO) {
         Post post = postRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
         
-        if (postData.getTitle() != null) {
-            post.setTitle(postData.getTitle());
-        }
-        if (postData.getBody() != null) {
-            post.setBody(postData.getBody());
-        }
-        // Обновляем published, если оно передано в запросе
-        // Используем isPublished() для примитива boolean
-        if (postData.isPublished() != post.isPublished()) {
-            post.setPublished(postData.isPublished());
-        }
-        
-        return postRepository.save(post);
+        postMapper.updateEntity(post, postUpdateDTO);
+        Post updatedPost = postRepository.save(post);
+        return postMapper.toDTO(updatedPost);
     }
 
     @DeleteMapping("/{id}")

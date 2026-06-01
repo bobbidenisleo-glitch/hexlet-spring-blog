@@ -1,9 +1,12 @@
 package io.hexlet.blog.controller;
 
+import io.hexlet.blog.dto.UserDTO;
+import io.hexlet.blog.dto.UserCreateDTO;
+import io.hexlet.blog.mapper.UserMapper;
 import io.hexlet.blog.model.User;
 import io.hexlet.blog.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -13,44 +16,44 @@ import java.util.List;
 @RequestMapping("/api/users")
 public class UsersController {
 
-    private final UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
     
-    public UsersController(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    @Autowired
+    private UserMapper userMapper;
+
+    @GetMapping
+    public List<UserDTO> index() {
+        return userRepository.findAll().stream()
+                .map(userMapper::toDTO)
+                .toList();
     }
-    
-    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<User> index() {
-        return userRepository.findAll();
-    }
-    
-    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public User show(@PathVariable Long id) {
-        return userRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-    }
-    
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(HttpStatus.CREATED)
-    public User create(@RequestBody User user) {
-        return userRepository.save(user);
-    }
-    
-    @PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public User update(@PathVariable Long id, @RequestBody User userData) {
+
+    @GetMapping("/{id}")
+    public UserDTO show(@PathVariable Long id) {
         User user = userRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-        
-        if (userData.getUsername() != null) {
-            user.setUsername(userData.getUsername());
-        }
-        if (userData.getEmail() != null) {
-            user.setEmail(userData.getEmail());
-        }
-        
-        return userRepository.save(user);
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        return userMapper.toDTO(user);
     }
-    
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public UserDTO create(@RequestBody UserCreateDTO userCreateDTO) {
+        User user = userMapper.toEntity(userCreateDTO);
+        User savedUser = userRepository.save(user);
+        return userMapper.toDTO(savedUser);
+    }
+
+    @PutMapping("/{id}")
+    public UserDTO update(@PathVariable Long id, @RequestBody UserCreateDTO userUpdateDTO) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        
+        userMapper.updateEntity(user, userUpdateDTO);
+        User updatedUser = userRepository.save(user);
+        return userMapper.toDTO(updatedUser);
+    }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
