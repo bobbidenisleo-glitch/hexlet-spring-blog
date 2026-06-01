@@ -1,6 +1,8 @@
 package io.hexlet.blog.controller;
 
 import io.hexlet.blog.model.Post;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -17,46 +19,59 @@ public class PostsController {
 
     // GET /posts - список всех постов
     @GetMapping
-    public List<Post> index() {
-        return posts;
+    public ResponseEntity<List<Post>> index() {
+        return ResponseEntity.ok()
+                .header("X-Total-Count", String.valueOf(posts.size()))
+                .body(posts);
     }
 
     // GET /posts/{id} - получение одного поста
     @GetMapping("/{id}")
-    public Optional<Post> show(@PathVariable Long id) {
-        return posts.stream()
-                .filter(post -> post.getId().equals(id))
+    public ResponseEntity<Post> show(@PathVariable Long id) {
+        Optional<Post> post = posts.stream()
+                .filter(p -> p.getId().equals(id))
                 .findFirst();
+        
+        return ResponseEntity.of(post); // 200 если есть, 404 если нет
     }
 
     // POST /posts - создание поста
     @PostMapping
-    public Post create(@RequestBody Post post) {
+    public ResponseEntity<Post> create(@RequestBody Post post) {
         Long newId = idCounter.getAndIncrement();
         post.setId(newId);
         posts.add(post);
-        return post;
+        return ResponseEntity.status(HttpStatus.CREATED).body(post); // 201 Created
     }
 
     // PUT /posts/{id} - обновление поста
     @PutMapping("/{id}")
-    public Post update(@PathVariable Long id, @RequestBody Post updatedPost) {
+    public ResponseEntity<Post> update(@PathVariable Long id, @RequestBody Post updatedPost) {
         Optional<Post> existingPost = posts.stream()
-                .filter(post -> post.getId().equals(id))
+                .filter(p -> p.getId().equals(id))
                 .findFirst();
 
-        existingPost.ifPresent(post -> {
-            post.setTitle(updatedPost.getTitle());
-            post.setContent(updatedPost.getContent());
-            post.setAuthor(updatedPost.getAuthor());
-        });
+        if (existingPost.isEmpty()) {
+            return ResponseEntity.notFound().build(); // 404 Not Found
+        }
 
-        return updatedPost;
+        Post post = existingPost.get();
+        post.setTitle(updatedPost.getTitle());
+        post.setContent(updatedPost.getContent());
+        post.setAuthor(updatedPost.getAuthor());
+
+        return ResponseEntity.ok(post); // 200 OK
     }
 
     // DELETE /posts/{id} - удаление поста
     @DeleteMapping("/{id}")
-    public void destroy(@PathVariable Long id) {
-        posts.removeIf(post -> post.getId().equals(id));
+    public ResponseEntity<Void> destroy(@PathVariable Long id) {
+        boolean removed = posts.removeIf(p -> p.getId().equals(id));
+        
+        if (!removed) {
+            return ResponseEntity.notFound().build(); // 404 Not Found
+        }
+        
+        return ResponseEntity.noContent().build(); // 204 No Content
     }
 }
