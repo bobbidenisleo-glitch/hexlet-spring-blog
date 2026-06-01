@@ -32,6 +32,7 @@ public class UserMapper {
         return user;
     }
     
+    // Частичное обновление — обновляем только не-null поля
     public void updateEntity(User user, UserUpdateDTO userUpdateDTO) {
         if (userUpdateDTO.getUsername() != null) {
             user.setUsername(userUpdateDTO.getUsername());

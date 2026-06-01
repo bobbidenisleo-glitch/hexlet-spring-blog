@@ -2,6 +2,7 @@ package io.hexlet.blog.controller;
 
 import io.hexlet.blog.dto.PostDTO;
 import io.hexlet.blog.dto.PostCreateDTO;
+import io.hexlet.blog.dto.PostUpdateDTO;
 import io.hexlet.blog.mapper.PostMapper;
 import io.hexlet.blog.model.Post;
 import io.hexlet.blog.model.User;
@@ -71,7 +72,7 @@ public class PostsController {
     }
 
     @PutMapping("/{id}")
-    public PostDTO update(@PathVariable Long id, @Valid @RequestBody PostCreateDTO postUpdateDTO) {
+    public PostDTO update(@PathVariable Long id, @Valid @RequestBody PostUpdateDTO postUpdateDTO) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
         

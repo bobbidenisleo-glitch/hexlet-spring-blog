@@ -2,6 +2,7 @@ package io.hexlet.blog.mapper;
 
 import io.hexlet.blog.dto.PostDTO;
 import io.hexlet.blog.dto.PostCreateDTO;
+import io.hexlet.blog.dto.PostUpdateDTO;
 import io.hexlet.blog.model.Post;
 import io.hexlet.blog.model.User;
 import org.springframework.stereotype.Component;
@@ -40,13 +41,16 @@ public class PostMapper {
         return post;
     }
     
-    public void updateEntity(Post post, PostCreateDTO postCreateDTO) {
-        if (postCreateDTO.getTitle() != null) {
-            post.setTitle(postCreateDTO.getTitle());
+    // Частичное обновление — обновляем только не-null поля
+    public void updateEntity(Post post, PostUpdateDTO postUpdateDTO) {
+        if (postUpdateDTO.getTitle() != null) {
+            post.setTitle(postUpdateDTO.getTitle());
         }
-        if (postCreateDTO.getBody() != null) {
-            post.setBody(postCreateDTO.getBody());
+        if (postUpdateDTO.getBody() != null) {
+            post.setBody(postUpdateDTO.getBody());
         }
-        post.setPublished(postCreateDTO.isPublished());
+        if (postUpdateDTO.getPublished() != null) {
+            post.setPublished(postUpdateDTO.getPublished());
+        }
     }
 }
