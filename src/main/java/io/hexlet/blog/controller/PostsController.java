@@ -11,13 +11,12 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 @RestController
-@RequestMapping("/posts")
+@RequestMapping("/api/posts")
 public class PostsController {
 
     private final List<Post> posts = new ArrayList<>();
     private final AtomicLong idCounter = new AtomicLong(1);
 
-    // GET /posts - список всех постов
     @GetMapping
     public ResponseEntity<List<Post>> index() {
         return ResponseEntity.ok()
@@ -25,26 +24,23 @@ public class PostsController {
                 .body(posts);
     }
 
-    // GET /posts/{id} - получение одного поста
     @GetMapping("/{id}")
     public ResponseEntity<Post> show(@PathVariable Long id) {
         Optional<Post> post = posts.stream()
                 .filter(p -> p.getId().equals(id))
                 .findFirst();
         
-        return ResponseEntity.of(post); // 200 если есть, 404 если нет
+        return ResponseEntity.of(post);
     }
 
-    // POST /posts - создание поста
     @PostMapping
     public ResponseEntity<Post> create(@RequestBody Post post) {
         Long newId = idCounter.getAndIncrement();
         post.setId(newId);
         posts.add(post);
-        return ResponseEntity.status(HttpStatus.CREATED).body(post); // 201 Created
+        return ResponseEntity.status(HttpStatus.CREATED).body(post);
     }
 
-    // PUT /posts/{id} - обновление поста
     @PutMapping("/{id}")
     public ResponseEntity<Post> update(@PathVariable Long id, @RequestBody Post updatedPost) {
         Optional<Post> existingPost = posts.stream()
@@ -52,7 +48,7 @@ public class PostsController {
                 .findFirst();
 
         if (existingPost.isEmpty()) {
-            return ResponseEntity.notFound().build(); // 404 Not Found
+            return ResponseEntity.notFound().build();
         }
 
         Post post = existingPost.get();
@@ -60,18 +56,17 @@ public class PostsController {
         post.setContent(updatedPost.getContent());
         post.setAuthor(updatedPost.getAuthor());
 
-        return ResponseEntity.ok(post); // 200 OK
+        return ResponseEntity.ok(post);
     }
 
-    // DELETE /posts/{id} - удаление поста
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> destroy(@PathVariable Long id) {
         boolean removed = posts.removeIf(p -> p.getId().equals(id));
         
         if (!removed) {
-            return ResponseEntity.notFound().build(); // 404 Not Found
+            return ResponseEntity.notFound().build();
         }
         
-        return ResponseEntity.noContent().build(); // 204 No Content
+        return ResponseEntity.noContent().build();
     }
 }
