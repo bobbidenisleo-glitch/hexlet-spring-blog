@@ -2,6 +2,7 @@ package io.hexlet.blog.mapper;
 
 import io.hexlet.blog.dto.UserDTO;
 import io.hexlet.blog.dto.UserCreateDTO;
+import io.hexlet.blog.dto.UserUpdateDTO;
 import io.hexlet.blog.model.User;
 import org.springframework.stereotype.Component;
 
@@ -31,12 +32,12 @@ public class UserMapper {
         return user;
     }
     
-    public void updateEntity(User user, UserCreateDTO userCreateDTO) {
-        if (userCreateDTO.getUsername() != null) {
-            user.setUsername(userCreateDTO.getUsername());
+    public void updateEntity(User user, UserUpdateDTO userUpdateDTO) {
+        if (userUpdateDTO.getUsername() != null) {
+            user.setUsername(userUpdateDTO.getUsername());
         }
-        if (userCreateDTO.getEmail() != null) {
-            user.setEmail(userCreateDTO.getEmail());
+        if (userUpdateDTO.getEmail() != null) {
+            user.setEmail(userUpdateDTO.getEmail());
         }
     }
 }

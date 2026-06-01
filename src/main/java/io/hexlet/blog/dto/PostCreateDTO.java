@@ -1,18 +1,23 @@
 package io.hexlet.blog.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import jakarta.validation.constraints.NotBlank;
 
 @Getter
 @Setter
 public class PostCreateDTO {
-    @NotBlank
+    
+    @NotBlank(message = "Title is required")
+    @Size(min = 3, max = 100, message = "Title must be between 3 and 100 characters")
     private String title;
     
-    @NotBlank
+    @NotBlank(message = "Body is required")
+    @Size(min = 10, message = "Body must be at least 10 characters")
     private String body;
     
     private boolean published;
+    
     private Long userId;
 }

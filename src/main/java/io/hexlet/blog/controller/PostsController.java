@@ -7,6 +7,7 @@ import io.hexlet.blog.model.Post;
 import io.hexlet.blog.model.User;
 import io.hexlet.blog.repository.PostRepository;
 import io.hexlet.blog.repository.UserRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -60,7 +61,7 @@ public class PostsController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PostDTO create(@RequestBody PostCreateDTO postCreateDTO) {
+    public PostDTO create(@Valid @RequestBody PostCreateDTO postCreateDTO) {
         User user = userRepository.findById(postCreateDTO.getUserId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         
@@ -70,7 +71,7 @@ public class PostsController {
     }
 
     @PutMapping("/{id}")
-    public PostDTO update(@PathVariable Long id, @RequestBody PostCreateDTO postUpdateDTO) {
+    public PostDTO update(@PathVariable Long id, @Valid @RequestBody PostCreateDTO postUpdateDTO) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
         
