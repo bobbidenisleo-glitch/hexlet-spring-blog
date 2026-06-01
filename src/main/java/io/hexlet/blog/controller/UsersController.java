@@ -2,6 +2,7 @@ package io.hexlet.blog.controller;
 
 import io.hexlet.blog.model.User;
 import io.hexlet.blog.repository.UserRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,12 +31,12 @@ public class UsersController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public User create(@RequestBody User user) {
+    public User create(@Valid @RequestBody User user) {
         return userRepository.save(user);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> update(@PathVariable Long id, @RequestBody User userData) {
+    public ResponseEntity<User> update(@PathVariable Long id, @Valid @RequestBody User userData) {
         return userRepository.findById(id)
                 .map(user -> {
                     user.setName(userData.getName());
