@@ -5,8 +5,8 @@ import io.hexlet.blog.repository.UserRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -23,10 +23,9 @@ public class UsersController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> show(@PathVariable Long id) {
+    public User show(@PathVariable Long id) {
         return userRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
 
     @PostMapping
@@ -36,15 +35,19 @@ public class UsersController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> update(@PathVariable Long id, @Valid @RequestBody User userData) {
-        return userRepository.findById(id)
-                .map(user -> {
-                    user.setName(userData.getName());
-                    user.setEmail(userData.getEmail());
-                    user.setPassword(userData.getPassword());
-                    return ResponseEntity.ok(userRepository.save(user));
-                })
-                .orElse(ResponseEntity.notFound().build());
+    public User update(@PathVariable Long id, @Valid @RequestBody User userData) {
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        
+        // Используем правильные поля: username и email
+        if (userData.getUsername() != null) {
+            user.setUsername(userData.getUsername());
+        }
+        if (userData.getEmail() != null) {
+            user.setEmail(userData.getEmail());
+        }
+        
+        return userRepository.save(user);
     }
 
     @DeleteMapping("/{id}")
