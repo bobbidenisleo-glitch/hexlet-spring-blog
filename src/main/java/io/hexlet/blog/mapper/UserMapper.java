@@ -4,41 +4,21 @@ import io.hexlet.blog.dto.UserDTO;
 import io.hexlet.blog.dto.UserCreateDTO;
 import io.hexlet.blog.dto.UserUpdateDTO;
 import io.hexlet.blog.model.User;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.ReportingPolicy;
 
-@Component
-public class UserMapper {
+@Mapper(
+    componentModel = "spring",
+    unmappedTargetPolicy = ReportingPolicy.IGNORE,
+    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
+)
+public interface UserMapper {
     
-    public UserDTO toDTO(User user) {
-        if (user == null) {
-            return null;
-        }
-        return new UserDTO(
-            user.getId(),
-            user.getUsername(),
-            user.getEmail(),
-            user.getCreatedAt(),
-            user.getUpdatedAt()
-        );
-    }
+    UserDTO toDTO(User user);
     
-    public User toEntity(UserCreateDTO userCreateDTO) {
-        if (userCreateDTO == null) {
-            return null;
-        }
-        User user = new User();
-        user.setUsername(userCreateDTO.getUsername());
-        user.setEmail(userCreateDTO.getEmail());
-        return user;
-    }
+    User toEntity(UserCreateDTO createDTO);
     
-    // Частичное обновление — обновляем только не-null поля
-    public void updateEntity(User user, UserUpdateDTO userUpdateDTO) {
-        if (userUpdateDTO.getUsername() != null) {
-            user.setUsername(userUpdateDTO.getUsername());
-        }
-        if (userUpdateDTO.getEmail() != null) {
-            user.setEmail(userUpdateDTO.getEmail());
-        }
-    }
+    void updateEntity(UserUpdateDTO updateDTO, @MappingTarget User user);
 }

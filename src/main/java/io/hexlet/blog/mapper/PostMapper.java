@@ -5,52 +5,35 @@ import io.hexlet.blog.dto.PostCreateDTO;
 import io.hexlet.blog.dto.PostUpdateDTO;
 import io.hexlet.blog.model.Post;
 import io.hexlet.blog.model.User;
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.ReportingPolicy;
 
-@Component
-public class PostMapper {
+@Mapper(
+    componentModel = "spring",
+    unmappedTargetPolicy = ReportingPolicy.IGNORE,
+    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
+)
+public interface PostMapper {
     
-    public PostDTO toDTO(Post post) {
-        if (post == null) {
+    @Mapping(source = "user.id", target = "userId")
+    PostDTO toDTO(Post post);
+    
+    @Mapping(target = "user", source = "userId", qualifiedByName = "mapUserIdToUser")
+    Post toEntity(PostCreateDTO createDTO);
+    
+    void updateEntity(PostUpdateDTO updateDTO, @MappingTarget Post post);
+    
+    @Named("mapUserIdToUser")
+    default User mapUserIdToUser(Long userId) {
+        if (userId == null) {
             return null;
         }
-        PostDTO dto = new PostDTO();
-        dto.setId(post.getId());
-        dto.setTitle(post.getTitle());
-        dto.setBody(post.getBody());
-        dto.setPublished(post.isPublished());
-        dto.setCreatedAt(post.getCreatedAt());
-        dto.setUpdatedAt(post.getUpdatedAt());
-        
-        if (post.getUser() != null) {
-            dto.setUserId(post.getUser().getId());
-        }
-        
-        return dto;
-    }
-    
-    public Post toEntity(PostCreateDTO postCreateDTO, User user) {
-        if (postCreateDTO == null) {
-            return null;
-        }
-        Post post = new Post();
-        post.setTitle(postCreateDTO.getTitle());
-        post.setBody(postCreateDTO.getBody());
-        post.setPublished(postCreateDTO.isPublished());
-        post.setUser(user);
-        return post;
-    }
-    
-    // Частичное обновление — обновляем только не-null поля
-    public void updateEntity(Post post, PostUpdateDTO postUpdateDTO) {
-        if (postUpdateDTO.getTitle() != null) {
-            post.setTitle(postUpdateDTO.getTitle());
-        }
-        if (postUpdateDTO.getBody() != null) {
-            post.setBody(postUpdateDTO.getBody());
-        }
-        if (postUpdateDTO.getPublished() != null) {
-            post.setPublished(postUpdateDTO.getPublished());
-        }
+        User user = new User();
+        user.setId(userId);
+        return user;
     }
 }

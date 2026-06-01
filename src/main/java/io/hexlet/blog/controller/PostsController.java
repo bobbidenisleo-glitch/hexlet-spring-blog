@@ -66,7 +66,8 @@ public class PostsController {
         User user = userRepository.findById(postCreateDTO.getUserId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         
-        Post post = postMapper.toEntity(postCreateDTO, user);
+        Post post = postMapper.toEntity(postCreateDTO);
+        post.setUser(user);
         Post savedPost = postRepository.save(post);
         return postMapper.toDTO(savedPost);
     }
@@ -76,7 +77,7 @@ public class PostsController {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
         
-        postMapper.updateEntity(post, postUpdateDTO);
+        postMapper.updateEntity(postUpdateDTO, post);
         Post updatedPost = postRepository.save(post);
         return postMapper.toDTO(updatedPost);
     }

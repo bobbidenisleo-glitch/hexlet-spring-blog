@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users")
@@ -28,7 +29,7 @@ public class UsersController {
     public List<UserDTO> index() {
         return userRepository.findAll().stream()
                 .map(userMapper::toDTO)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
@@ -51,7 +52,7 @@ public class UsersController {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         
-        userMapper.updateEntity(user, userUpdateDTO);
+        userMapper.updateEntity(userUpdateDTO, user);
         User updatedUser = userRepository.save(user);
         return userMapper.toDTO(updatedUser);
     }
