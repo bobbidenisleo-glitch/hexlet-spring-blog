@@ -2,6 +2,7 @@ package io.hexlet.blog.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,5 +20,6 @@ public class PostCreateDTO {
     
     private boolean published;
     
+    @NotNull(message = "User ID is required")
     private Long userId;
 }
