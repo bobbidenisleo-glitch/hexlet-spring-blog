@@ -7,14 +7,8 @@ import io.hexlet.blog.model.Tag;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
-import org.mapstruct.ReportingPolicy;
 
-@Mapper(
-    componentModel = MappingConstants.ComponentModel.SPRING,
-    unmappedTargetPolicy = ReportingPolicy.IGNORE,
-    nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
-)
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface TagMapper {
     TagDTO toDTO(Tag tag);
     Tag toEntity(TagCreateDTO createDTO);

@@ -54,7 +54,6 @@ public class TagsController {
         Tag tag = tagRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Tag not found"));
         
-        // Если имя меняется, проверяем, не занято ли новое имя
         if (!updateDTO.getName().equals(tag.getName())) {
             if (tagRepository.existsByName(updateDTO.getName())) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Tag name already exists");

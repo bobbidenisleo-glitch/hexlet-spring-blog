@@ -8,7 +8,7 @@ import lombok.Setter;
 @Table(name = "tags")
 @Getter
 @Setter
-public class Tag implements BaseEntity {
+public class Tag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
