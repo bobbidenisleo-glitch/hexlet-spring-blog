@@ -3,6 +3,7 @@ package io.hexlet.blog.controller;
 import io.hexlet.blog.dto.PostDTO;
 import io.hexlet.blog.dto.PostCreateDTO;
 import io.hexlet.blog.dto.PostUpdateDTO;
+import io.hexlet.blog.dto.PostPatchDTO;
 import io.hexlet.blog.mapper.PostMapper;
 import io.hexlet.blog.model.Post;
 import io.hexlet.blog.model.User;
@@ -32,15 +33,13 @@ public class PostsController {
 
     @GetMapping("/published")
     public Page<PostDTO> getPublishedPosts(
-        @RequestParam(defaultValue = "0") int page,
-        @RequestParam(defaultValue = "5") int size,
-        @RequestParam(defaultValue = "createdAt") String sortBy,
-        @RequestParam(defaultValue = "desc") String direction
-    ) {
-        Sort.Direction sortDirection = direction.equalsIgnoreCase("desc") 
-            ? Sort.Direction.DESC 
-            : Sort.Direction.ASC;
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction) {
         
+        Sort.Direction sortDirection = direction.equalsIgnoreCase("desc") 
+                ? Sort.Direction.DESC : Sort.Direction.ASC;
         Sort sort = Sort.by(sortDirection, sortBy);
         PageRequest pageRequest = PageRequest.of(page, size, sort);
         
@@ -77,9 +76,19 @@ public class PostsController {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
         
-        postMapper.updateEntity(postUpdateDTO, post);
+        postMapper.update(postUpdateDTO, post);
         Post updatedPost = postRepository.save(post);
         return postMapper.toDTO(updatedPost);
+    }
+
+    @PatchMapping("/{id}")
+    public PostDTO patch(@PathVariable Long id, @Valid @RequestBody PostPatchDTO postPatchDTO) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
+        
+        postMapper.patch(postPatchDTO, post);
+        Post patchedPost = postRepository.save(post);
+        return postMapper.toDTO(patchedPost);
     }
 
     @DeleteMapping("/{id}")

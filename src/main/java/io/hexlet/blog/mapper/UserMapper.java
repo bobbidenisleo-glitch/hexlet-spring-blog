@@ -3,14 +3,17 @@ package io.hexlet.blog.mapper;
 import io.hexlet.blog.dto.UserDTO;
 import io.hexlet.blog.dto.UserCreateDTO;
 import io.hexlet.blog.dto.UserUpdateDTO;
+import io.hexlet.blog.dto.UserPatchDTO;
 import io.hexlet.blog.model.User;
 import org.mapstruct.Mapper;
+import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
 
 @Mapper(
-    componentModel = "spring",
+    uses = { JsonNullableMapper.class },
+    componentModel = MappingConstants.ComponentModel.SPRING,
     unmappedTargetPolicy = ReportingPolicy.IGNORE,
     nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
 )
@@ -20,5 +23,7 @@ public interface UserMapper {
     
     User toEntity(UserCreateDTO createDTO);
     
-    void updateEntity(UserUpdateDTO updateDTO, @MappingTarget User user);
+    void update(UserUpdateDTO updateDTO, @MappingTarget User user);
+    
+    void patch(UserPatchDTO patchDTO, @MappingTarget User user);
 }

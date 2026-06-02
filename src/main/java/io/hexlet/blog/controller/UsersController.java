@@ -3,6 +3,7 @@ package io.hexlet.blog.controller;
 import io.hexlet.blog.dto.UserDTO;
 import io.hexlet.blog.dto.UserCreateDTO;
 import io.hexlet.blog.dto.UserUpdateDTO;
+import io.hexlet.blog.dto.UserPatchDTO;
 import io.hexlet.blog.mapper.UserMapper;
 import io.hexlet.blog.model.User;
 import io.hexlet.blog.repository.UserRepository;
@@ -52,9 +53,19 @@ public class UsersController {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         
-        userMapper.updateEntity(userUpdateDTO, user);
+        userMapper.update(userUpdateDTO, user);
         User updatedUser = userRepository.save(user);
         return userMapper.toDTO(updatedUser);
+    }
+
+    @PatchMapping("/{id}")
+    public UserDTO patch(@PathVariable Long id, @Valid @RequestBody UserPatchDTO userPatchDTO) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        
+        userMapper.patch(userPatchDTO, user);
+        User patchedUser = userRepository.save(user);
+        return userMapper.toDTO(patchedUser);
     }
 
     @DeleteMapping("/{id}")
