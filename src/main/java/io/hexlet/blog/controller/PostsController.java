@@ -62,11 +62,17 @@ public class PostsController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public PostDTO create(@Valid @RequestBody PostCreateDTO postCreateDTO) {
+        // Находим пользователя по ID из DTO
         User user = userRepository.findById(postCreateDTO.getUserId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         
+        // Создаём пост и устанавливаем связь с пользователем
         Post post = postMapper.toEntity(postCreateDTO);
         post.setUser(user);
+        
+        // Также можно добавить пост в коллекцию пользователя
+        user.getPosts().add(post);
+        
         Post savedPost = postRepository.save(post);
         return postMapper.toDTO(savedPost);
     }
@@ -94,6 +100,14 @@ public class PostsController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Post not found"));
+        
+        // Удаляем пост из коллекции пользователя
+        if (post.getUser() != null) {
+            post.getUser().getPosts().remove(post);
+        }
+        
         postRepository.deleteById(id);
     }
 }

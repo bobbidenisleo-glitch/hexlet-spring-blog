@@ -22,10 +22,10 @@ public class Post {
 
     private String title;
     private String body;
-    
-    private boolean published = false;  // Новое поле
+    private boolean published;
 
-    @ManyToOne
+    // Связь ManyToOne с пользователем
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     @JsonIgnore
     private User user;

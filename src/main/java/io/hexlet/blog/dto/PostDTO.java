@@ -13,5 +13,5 @@ public class PostDTO {
     private boolean published;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private Long userId;  // Только ID пользователя, не весь объект
+    private Long userId;  // ID пользователя-владельца поста
 }

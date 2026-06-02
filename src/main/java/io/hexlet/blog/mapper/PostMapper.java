@@ -10,6 +10,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
 
@@ -24,21 +25,20 @@ public interface PostMapper {
     @Mapping(source = "user.id", target = "userId")
     PostDTO toDTO(Post post);
     
-    @Mapping(target = "user", source = "userId")
+    @Mapping(target = "user", source = "userId", qualifiedByName = "mapUserIdToUser")
     Post toEntity(PostCreateDTO createDTO);
     
     void update(PostUpdateDTO updateDTO, @MappingTarget Post post);
     
     void patch(PostPatchDTO patchDTO, @MappingTarget Post post);
     
-    default User map(Long userId) {
-        if (userId == null) return null;
+    @Named("mapUserIdToUser")
+    default User mapUserIdToUser(Long userId) {
+        if (userId == null) {
+            return null;
+        }
         User user = new User();
         user.setId(userId);
         return user;
-    }
-    
-    default Long map(User user) {
-        return user != null ? user.getId() : null;
     }
 }
