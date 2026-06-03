@@ -46,6 +46,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     testImplementation("org.springframework.security:spring-security-test")
+    
+    // PostgreSQL for production
+    runtimeOnly("org.postgresql:postgresql")
 }
 
 jacoco {

@@ -5,11 +5,13 @@ import io.hexlet.blog.model.Post;
 import io.hexlet.blog.repository.UserRepository;
 import io.hexlet.blog.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import jakarta.annotation.PostConstruct;
 
 @Component
+@Profile("development")
 public class DataInitializer {
 
     @Autowired
@@ -23,12 +25,11 @@ public class DataInitializer {
     
     @PostConstruct
     public void init() {
-        System.out.println("=== DataInitializer запущен ===");
+        System.out.println("=== DataInitializer запущен (development profile) ===");
         
         if (userRepository.count() == 0) {
             System.out.println("=== Начинаем заполнение базы данных ===");
             
-            // Создаём пользователей с паролями
             User user1 = new User();
             user1.setUsername("alice");
             user1.setEmail("alice@example.com");
@@ -49,7 +50,7 @@ public class DataInitializer {
             
             System.out.println("Создано пользователей: " + userRepository.count());
             
-            // Создаём посты
+            // Посты...
             Post post1 = new Post();
             post1.setTitle("Hello Spring Boot");
             post1.setBody("Learning Spring Boot is fun!");
@@ -86,10 +87,7 @@ public class DataInitializer {
             postRepository.save(post5);
             
             System.out.println("Создано постов: " + postRepository.count());
-            System.out.println("Опубликованных постов: " + postRepository.countByPublishedTrue());
             System.out.println("=== База данных успешно заполнена ===");
-        } else {
-            System.out.println("Данные уже есть: " + userRepository.count() + " пользователей, " + postRepository.count() + " постов");
         }
     }
 }

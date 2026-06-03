@@ -3,6 +3,7 @@ package io.hexlet.blog.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -35,17 +36,12 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // Публичные эндпоинты
                         .requestMatchers("/api/login").permitAll()
-                        .requestMatchers("/api/users").permitAll()  // Регистрация
-                        .requestMatchers("/api/posts").permitAll()  // Просмотр постов
-                        .requestMatchers("/api/posts/**").permitAll()  // Просмотр постов
-                        .requestMatchers("/api/tags").permitAll()  // Просмотр тегов
+                        .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
+                        .requestMatchers("/api/posts").permitAll()
+                        .requestMatchers("/api/posts/**").permitAll()
+                        .requestMatchers("/api/tags").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
-                        // Защищённые эндпоинты
-                        .requestMatchers("/api/posts", "/api/posts/**").authenticated()
-                        .requestMatchers("/api/users/**").authenticated()
-                        .requestMatchers("/api/tags/**").authenticated()
                         .anyRequest().authenticated())
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
