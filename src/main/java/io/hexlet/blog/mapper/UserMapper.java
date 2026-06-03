@@ -5,10 +5,13 @@ import io.hexlet.blog.dto.UserCreateDTO;
 import io.hexlet.blog.dto.UserUpdateDTO;
 import io.hexlet.blog.model.User;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Mapper(
     uses = { JsonNullableMapper.class },
@@ -16,11 +19,15 @@ import org.mapstruct.ReportingPolicy;
     unmappedTargetPolicy = ReportingPolicy.IGNORE,
     nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE
 )
-public interface UserMapper {
+public abstract class UserMapper {
     
-    UserDTO toDTO(User user);
+    @Autowired
+    protected PasswordEncoder passwordEncoder;
     
-    User toEntity(UserCreateDTO createDTO);
+    public abstract UserDTO toDTO(User user);
     
-    void update(UserUpdateDTO updateDTO, @MappingTarget User user);
+    @Mapping(target = "passwordDigest", expression = "java(passwordEncoder.encode(createDTO.getPassword()))")
+    public abstract User toEntity(UserCreateDTO createDTO);
+    
+    public abstract void update(UserUpdateDTO updateDTO, @MappingTarget User user);
 }

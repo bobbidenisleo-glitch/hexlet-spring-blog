@@ -5,6 +5,7 @@ import io.hexlet.blog.model.Post;
 import io.hexlet.blog.repository.UserRepository;
 import io.hexlet.blog.repository.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import jakarta.annotation.PostConstruct;
 
@@ -17,6 +18,9 @@ public class DataInitializer {
     @Autowired
     private PostRepository postRepository;
     
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    
     @PostConstruct
     public void init() {
         System.out.println("=== DataInitializer запущен ===");
@@ -24,20 +28,23 @@ public class DataInitializer {
         if (userRepository.count() == 0) {
             System.out.println("=== Начинаем заполнение базы данных ===");
             
-            // Создаём пользователей
+            // Создаём пользователей с паролями
             User user1 = new User();
             user1.setUsername("alice");
             user1.setEmail("alice@example.com");
+            user1.setPasswordDigest(passwordEncoder.encode("password"));
             userRepository.save(user1);
             
             User user2 = new User();
             user2.setUsername("bob");
             user2.setEmail("bob@example.com");
+            user2.setPasswordDigest(passwordEncoder.encode("password"));
             userRepository.save(user2);
             
             User user3 = new User();
             user3.setUsername("charlie");
             user3.setEmail("charlie@example.com");
+            user3.setPasswordDigest(passwordEncoder.encode("password"));
             userRepository.save(user3);
             
             System.out.println("Создано пользователей: " + userRepository.count());
