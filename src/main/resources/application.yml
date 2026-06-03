@@ -11,6 +11,14 @@ spring:
         jdbc:
           batch_size: 20
     show-sql: false
+  web:
+    resources:
+      static-locations: classpath:/static/
+  mvc:
+    static-path-pattern: /**
+
+app:
+  welcome-message: Welcome to Spring Boot!
 
 logging:
   level:
@@ -23,6 +31,3 @@ server:
   port: 8080
   error:
     include-message: always
-
-app:
-  welcome-message: Welcome to Spring Boot!
