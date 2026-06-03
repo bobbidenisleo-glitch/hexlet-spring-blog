@@ -3,7 +3,6 @@ package io.hexlet.blog.mapper;
 import io.hexlet.blog.dto.UserDTO;
 import io.hexlet.blog.dto.UserCreateDTO;
 import io.hexlet.blog.dto.UserUpdateDTO;
-import io.hexlet.blog.dto.UserPatchDTO;
 import io.hexlet.blog.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
@@ -24,6 +23,4 @@ public interface UserMapper {
     User toEntity(UserCreateDTO createDTO);
     
     void update(UserUpdateDTO updateDTO, @MappingTarget User user);
-    
-    void patch(UserPatchDTO patchDTO, @MappingTarget User user);
 }
